@@ -323,7 +323,10 @@ function getVisualGradient(
     const stopLen = colorStops.length;
     const outerColors = visualMeta.outerColors.slice();
 
-    if (stopLen && colorStops[0].coord > colorStops[stopLen - 1].coord) {
+    const coordExtent = axis.getExtent();
+    const isCoordReversed = axis.toGlobalCoord(coordExtent[0]) > axis.toGlobalCoord(coordExtent[1]);
+
+    if (stopLen && isCoordReversed) {
         colorStops.reverse();
         outerColors.reverse();
     }
@@ -336,6 +339,9 @@ function getVisualGradient(
         return colorStops[0].coord < 0
             ? (outerColors[1] ? outerColors[1] : colorStops[stopLen - 1].color)
             : (outerColors[0] ? outerColors[0] : colorStops[0].color);
+    }
+    if (!inRangeStopLen) {
+        return outerColors[0] || outerColors[1];
     }
 
     const tinyExtent = 10; // Arbitrary value: 10px

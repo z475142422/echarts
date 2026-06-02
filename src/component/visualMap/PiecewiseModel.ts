@@ -373,14 +373,14 @@ class PiecewiseModel extends VisualMapModel<PiecewiseVisualMapOption> {
             if (interval[0] === -Infinity) {
                 outerColors[0] = color;
             }
-            else if (interval[1] === Infinity) {
+            else {
+                stops.push({value: interval[0], color: color});
+            }
+            if (interval[1] === Infinity) {
                 outerColors[1] = color;
             }
             else {
-                stops.push(
-                    {value: interval[0], color: color},
-                    {value: interval[1], color: color}
-                );
+                stops.push({value: interval[1], color: color});
             }
         }
 

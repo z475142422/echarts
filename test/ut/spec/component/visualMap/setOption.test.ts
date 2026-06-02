@@ -23,7 +23,7 @@ import { EChartsType } from '../../../../../src/echarts';
 import { EChartsOption } from '../../../../../src/export/option';
 import { ContinuousVisualMapOption } from '../../../../../src/component/visualMap/ContinuousModel';
 import { PiecewiseVisualMapOption } from '../../../../../src/component/visualMap/PiecewiseModel';
-import VisualMapModel from '../../../../../src/component/visualMap/VisualMapModel';
+import VisualMapModel, { VisualMeta } from '../../../../../src/component/visualMap/VisualMapModel';
 import globalDefault from '../../../../../src/model/globalDefault';
 
 
@@ -284,6 +284,51 @@ describe('vsiaulMap_setOption', function () {
         expect(getVisual(5, 'color')).toEqual(makeCategoryVisual('red'));
         expect(getVisual(6, 'color')).toEqual(makeCategoryVisual(null, 'red'));
         expect(getVisual(7, 'opacity')).toEqual(makeCategoryVisual(0.4));
+        done();
+    });
+
+    it('piecewiseLineVisualMetaWithInfiniteBounds', function (done) {
+        expect(function () {
+            chart.setOption({
+                xAxis: {type: 'category', data: ['A', 'B', 'C', 'D']},
+                yAxis: {type: 'value'},
+                visualMap: {
+                    type: 'piecewise',
+                    dimension: 1,
+                    pieces: [{lte: null, color: 'red'}]
+                },
+                series: [{
+                    type: 'line',
+                    data: [['A', 4], ['B', 8], ['C', 18], ['D', 24]]
+                }]
+            });
+        }).not.toThrow();
+
+        let visualMeta = getECModel(chart).getSeriesByIndex(0).getData().getVisual('visualMeta') as VisualMeta[];
+        expect(visualMeta[0].stops).toEqual([]);
+        expect(visualMeta[0].outerColors).toEqual(['red', 'red']);
+
+        chart.clear();
+        chart.setOption({
+            xAxis: {type: 'category', data: ['A', 'B', 'C', 'D']},
+            yAxis: {type: 'value'},
+            visualMap: {
+                type: 'piecewise',
+                dimension: 1,
+                pieces: [{lte: 10, color: 'red'}],
+                outOfRange: {color: '#2563eb'}
+            },
+            series: [{
+                type: 'line',
+                data: [['A', 4], ['B', 8], ['C', 18], ['D', 24]]
+            }]
+        });
+
+        visualMeta = getECModel(chart).getSeriesByIndex(0).getData().getVisual('visualMeta') as VisualMeta[];
+        expect(visualMeta[0].stops.map(stop => stop.value)).toEqual([10, 10]);
+        expect(visualMeta[0].stops[0].color).toEqual('red');
+        expect(visualMeta[0].stops[1].color).toEqual('rgba(37,99,235,1)');
+        expect(visualMeta[0].outerColors).toEqual(['red', 'rgba(37,99,235,1)']);
         done();
     });
 
