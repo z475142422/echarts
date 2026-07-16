@@ -59,6 +59,64 @@ npm run release
 
 Then the "production" files are generated in the `dist` directory.
 
+### Custom Build (自定义打包)
+
+通过 `index.custom.js` 配置文件，可以只打包需要的模块，减小产物体积。
+
+**配置文件：** `index.custom.js`
+
+当前包含的模块：
+
+| 类型 | 模块 | 说明 |
+|------|------|------|
+| 渲染器 | `CanvasRenderer` | Canvas 渲染引擎 |
+| 图表 | `LineChart` | 折线图 |
+| 图表 | `BarChart` | 柱状图 |
+| 图表 | `PieChart` | 饼图 |
+| 组件 | `GridComponent` | 直角坐标系（含 xAxis/yAxis） |
+| 组件 | `TooltipComponent` | 提示框 |
+| 组件 | `LegendComponent` | 图例 |
+
+**打包命令：**
+
+```shell
+node build/build.js --type custom --format esm --min
+```
+
+**参数说明：**
+
+| 参数 | 值 | 说明 |
+|------|----|------|
+| `--type` | `custom` | 使用根目录 `index.custom.js` 作为入口 |
+| `--format` | `esm` | 输出 ES Module 格式（也支持 `umd`、`cjs`、`iife`） |
+| `--min` | - | 同时生成压缩版（`.min.js`） |
+
+**产物文件（生成在 `dist/` 目录）：**
+
+| 文件 | 说明 |
+|------|------|
+| `echarts.esm.custom.js` | ESM 未压缩版（含 sourcemap） |
+| `echarts.esm.custom.min.js` | ESM 压缩版（生产使用） |
+| `echarts.esm.custom.mjs` | ESM 未压缩版（`.mjs` 扩展名，兼容 webpack5/Node.js） |
+| `echarts.esm.custom.min.mjs` | ESM 压缩版（`.mjs` 扩展名） |
+
+**使用示例：**
+
+```js
+import * as echarts from './dist/echarts.esm.custom.min.js';
+
+const chart = echarts.init(document.getElementById('main'));
+chart.setOption({
+    tooltip: {},
+    legend: { data: ['销量'] },
+    xAxis: { data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子'] },
+    yAxis: {},
+    series: [{ name: '销量', type: 'bar', data: [5, 20, 36, 10, 10, 20] }]
+});
+```
+
+**如需添加更多模块，** 编辑 `index.custom.js`，参照 `index.common.js` 的格式从 `./lib/` 中导入并注册即可。
+
 ## Contribution
 
 Please refer to the [contributing](https://github.com/apache/echarts/blob/master/CONTRIBUTING.md) document if you wish to debug locally or make pull requests.
